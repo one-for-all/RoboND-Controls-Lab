@@ -26,6 +26,7 @@ class HoverTestRun:
         self.start_time_ = 0
         self.duration_ = 0
 
+
     def addPose(self ,pose_stamped):
         if self.is_started_ is False:
             return
@@ -33,6 +34,7 @@ class HoverTestRun:
             self.start_time_ = pose_stamped.header.stamp
             return
         self.test_data_.append((pose_stamped.header.stamp, pose_stamped.pose.position.z))
+
 
     def computeTotalError(self, set_point):
         total_error = 0
@@ -97,11 +99,12 @@ def initial_setup():
         y_torque_constrained(True)
         z_torque_constrained(True)
 
-        #Set camera pose to be aligned to X-axis (1)
+        # Set camera pose to be aligned to X-axis (1)
         camera_pose_type = rospy.ServiceProxy('/quad_rotor/camera_pose_type', SetInt)
         camera_pose_type(1)
     except rospy.ServiceException, e:
         rospy.logerr('Service call failed: {}'.format(e))
+
 
 def setup_test():
         # Reset the forces and velocities on the quad
@@ -113,6 +116,7 @@ def setup_test():
         initial_pose = Pose()
         initial_pose.position.z = 10
         response = set_position(initial_pose)
+
 
 def algorithm(pid_params):
     setup_test()
@@ -132,12 +136,15 @@ def algorithm(pid_params):
     # return the error, here lower error is better.
     return error
 
+
 def pose_callback(pose):
     curr_test_run.addPose(pose)
+
 
 def dyn_reconf_callback(config):
     # rospy.loginfo("""Target:{target}, kp:{kp}, ki:{ki}, kd:{kd}""".format(**config))
     pass
+
 
 def main():
     initial_params = [0.0, 0.0, 0.0]
@@ -145,10 +152,11 @@ def main():
 
     print("Initial Params: kp:{}, ki:{}, kd:{}".format(initial_params[0], initial_params[1], initial_params[2]))
 
-    #while forever, just run the twiddle and print out the results
+    # while forever, just run the twiddle and print out the results
     while not rospy.is_shutdown():
         (iterations, params, best_run) = twiddle_hover.run()
         print('iterations: {} params: {} best_run: {}'.format(iterations, params, best_run))
+
 
 if __name__ == '__main__':
     curr_test_run = HoverTestRun()
